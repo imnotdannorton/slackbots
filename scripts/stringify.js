@@ -1,9 +1,20 @@
+process.env.AWS_ACCESS_KEY_ID = 'AKIAJAN6JT3EJJRGULFA';
+process.env.AWS_SECRET_ACCESS_KEY = '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';
+
 var request = require('request').defaults({ encoding: null });
 var glitchify = require('../scripts/glitchImg');
 var path = require('path');
 var fs = require('fs');
 var gm = require('gm');
+var aws = require('aws-sdk');
+var s3 = new aws.S3();
 
+var S3_BUCKET = 'img-gen-bot';
+var s3Params = {
+    Bucket: S3_BUCKET,
+    ContentType: 'image/jpeg',
+    ACL: 'public-read'
+  };
 exports.base64 = function(link, res, q){
   request.get(link, function (error, response, body) {
     if (!error && response.statusCode == 200) {
@@ -30,8 +41,30 @@ exports.drawText = function(link, res, q){
   console.log("drawText: ", q);
   var filename = q.trim().split(" ").join("_") + '.jpg';
   request.get(link, function (error, response, body) {
-    gm(body).fill("#FFF").stroke("#000", 1).resize(400).fontSize('30px').font('Impact.ttf').drawText(20, 120,  q.toUpperCase()).write(filename, function(){
-      res.sendFile(filename, { root : path.join(__dirname, '../')});
+    gm(body).fill("#FFF").stroke("#000", 1).resize(400).fontSize('30px').font('Impact.ttf').drawText(20, 120,  q.toUpperCase()).stream(function(err, stdout, stderr){
+      // res.sendFile(filename, { root : path.join(__dirname, '../')});
+      s3Params.Key = filename;
+      // s3Params.Body = stdout;
+      console.log("out: ", stdout);
+      var buf = new Buffer('');
+    stdout.on('data', function(data) {
+       buf = Buffer.concat([buf, data]);
+    });
+    stdout.on('end', function(data) {
+        s3Params.Body = buf;
+      s3.putObject(s3Params, (err, data) => {
+        if(err){
+          console.log(err);
+          return res.end();
+        }
+        const returnData = {
+          signedRequest: data,
+          url: `https://${S3_BUCKET}.s3.amazonaws.com/${filename}`
+        };
+        res.write(JSON.stringify(returnData));
+        res.end();
+      });
+     });
     });
     // gm('test2.jpg')
     // .blur(8, 4)
