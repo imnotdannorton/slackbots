@@ -4,7 +4,7 @@ process.env.AWS_SECRET_ACCESS_KEY = 'PtqeIfhxWIneVvmAlxbcYm5FtippTIfsp4ubrrgG';
 var request = require('request').defaults({ encoding: null });
 var glitchify = require('../scripts/glitchImg');
 var path = require('path');
-var fs = require('fs');
+// var fs = require('fs');
 var gm = require('gm');
 var aws = require('aws-sdk');
 var s3 = new aws.S3();
@@ -15,27 +15,27 @@ var s3Params = {
     ContentType: 'image/jpeg',
     ACL: 'public-read'
   };
-exports.base64 = function(link, res, q){
-  request.get(link, function (error, response, body) {
-    if (!error && response.statusCode == 200) {
-        console.log(body);
-        var imgBuff = new Buffer(body);
-        var stringBuff = new Buffer(q);
-        var totalLength = imgBuff.length + stringBuff.length
+// exports.base64 = function(link, res, q){
+//   request.get(link, function (error, response, body) {
+//     if (!error && response.statusCode == 200) {
+//         console.log(body);
+//         var imgBuff = new Buffer(body);
+//         var stringBuff = new Buffer(q);
+//         var totalLength = imgBuff.length + stringBuff.length
 
-        var imgdata = new Buffer.concat([imgBuff, stringBuff], totalLength).toString('base64');
-        var glitchString = glitchify.glitch(imgdata, q);
-        console.log(glitchString);
-        data = "data:" + response.headers["content-type"] + ";base64," + imgdata
-        // var img = data.replace(/^data:image\/\w+;base64,/, '');
+//         var imgdata = new Buffer.concat([imgBuff, stringBuff], totalLength).toString('base64');
+//         var glitchString = glitchify.glitch(imgdata, q);
+//         console.log(glitchString);
+//         data = "data:" + response.headers["content-type"] + ";base64," + imgdata
+//         // var img = data.replace(/^data:image\/\w+;base64,/, '');
 
-        fs.writeFile('glitch.jpg', imgdata, {encoding: 'base64'}, function(err){
-          res.sendFile('glitch.jpg', { root : path.join(__dirname, '../')})
-        });
-        // console.log(data);
-    }
-  });
-}
+//         fs.writeFile('glitch.jpg', imgdata, {encoding: 'base64'}, function(err){
+//           res.sendFile('glitch.jpg', { root : path.join(__dirname, '../')})
+//         });
+//         // console.log(data);
+//     }
+//   });
+// }
 
 exports.drawText = function(link, res, q){
   console.log("drawText: ", q);
