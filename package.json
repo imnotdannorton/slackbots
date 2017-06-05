@@ -5,6 +5,9 @@
   "scripts": {
     "start": "node ./bin/www"
   },
+  "engines":{
+    "npm": "3.8.6"
+  }
   "dependencies": {
     "aws-sdk": "^2.56.0",
     "body-parser": "~1.15.1",
