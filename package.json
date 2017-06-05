@@ -20,6 +20,6 @@
     "request": "^2.74.0",
     "request-promise": "^4.0.2",
     "serve-favicon": "~2.3.0",
-    "twitter": "^1.3.0"
+    "twitter": "https://github.com/desmondmorris/node-twitter.git"
   }
 }
