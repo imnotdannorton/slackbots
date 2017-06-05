@@ -13,6 +13,7 @@ var http = require('http');
  */
 
 var port = normalizePort(process.env.PORT || '3000');
+console.log("starting on port: ", port);
 app.set('port', port);
 
 /**
@@ -54,6 +55,7 @@ function normalizePort(val) {
  */
 
 function onError(error) {
+  console.log(error, error.code);
   if (error.syscall !== 'listen') {
     throw error;
   }
