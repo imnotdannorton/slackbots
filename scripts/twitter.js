@@ -1,4 +1,4 @@
-var twitter = require('Twitter');
+var twitter = require('twitter');
 var constants = require('../config/globals');
 var parse = require('../routes/parse');
 var stringify = require('../scripts/stringify');
