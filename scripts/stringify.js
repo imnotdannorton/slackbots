@@ -6,6 +6,7 @@ var glitchify = require('../scripts/glitchImg');
 var path = require('path');
 // var fs = require('fs');
 var gm = require('gm');
+
 var aws = require('aws-sdk');
 var s3 = new aws.S3();
 
