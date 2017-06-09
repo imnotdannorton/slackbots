@@ -1,6 +1,3 @@
-process.env.AWS_ACCESS_KEY_ID = 'AKIAJAN6JT3EJJRGULFA';
-process.env.AWS_SECRET_ACCESS_KEY = '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';
-
 var request = require('request').defaults({ encoding: null });
 var glitchify = require('../scripts/glitchImg');
 var path = require('path');
@@ -41,9 +38,9 @@ var s3Params = {
 // }
 
 exports.drawText = function(link, res, q){
-  console.log("drawText: ", q);
   var filename = q.trim().split(" ").join("_") + '.jpg';
   request.get(link, function (error, response, body) {
+    console.log("drawtext get: ", error, response, body)
     gm(body).fill("#FFF").stroke("#000", 1).resize(400).fontSize('30px').font('Impact.ttf').drawText(20, 120,  q.toUpperCase()).stream(function(err, stdout, stderr){
       // res.sendFile(filename, { root : path.join(__dirname, '../')});
       s3Params.Key = filename;
@@ -54,7 +51,8 @@ exports.drawText = function(link, res, q){
        buf = Buffer.concat([buf, data]);
     });
     stdout.on('end', function(data) {
-        s3Params.Body = buf;
+      console.log(data, buf);
+      s3Params.Body = buf;
       s3.putObject(s3Params, (err, data) => {
         if(err){
           console.log(err);
