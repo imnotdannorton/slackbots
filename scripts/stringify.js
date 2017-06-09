@@ -15,28 +15,6 @@ var s3Params = {
     ContentType: 'image/jpeg',
     ACL: 'public-read'
   };
-// exports.base64 = function(link, res, q){
-//   request.get(link, function (error, response, body) {
-//     if (!error && response.statusCode == 200) {
-//         console.log(body);
-//         var imgBuff = new Buffer(body);
-//         var stringBuff = new Buffer(q);
-//         var totalLength = imgBuff.length + stringBuff.length
-
-//         var imgdata = new Buffer.concat([imgBuff, stringBuff], totalLength).toString('base64');
-//         var glitchString = glitchify.glitch(imgdata, q);
-//         console.log(glitchString);
-//         data = "data:" + response.headers["content-type"] + ";base64," + imgdata
-//         // var img = data.replace(/^data:image\/\w+;base64,/, '');
-
-//         fs.writeFile('glitch.jpg', imgdata, {encoding: 'base64'}, function(err){
-//           res.sendFile('glitch.jpg', { root : path.join(__dirname, '../')})
-//         });
-//         // console.log(data);
-//     }
-//   });
-// }
-
 exports.drawText = function(link, res, q){
   console.log("drawText: ", q);
   var filename = q.trim().split(" ").join("_") + '.jpg';
