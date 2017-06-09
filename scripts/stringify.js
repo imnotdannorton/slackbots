@@ -1,6 +1,3 @@
-process.env.AWS_ACCESS_KEY_ID = 'AKIAJAN6JT3EJJRGULFA';
-process.env.AWS_SECRET_ACCESS_KEY = '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';
-
 var request = require('request').defaults({ encoding: null });
 var glitchify = require('../scripts/glitchImg');
 var path = require('path');
