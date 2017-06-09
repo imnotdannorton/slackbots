@@ -3,7 +3,7 @@
 var request = require('request').defaults({ encoding: null });
 var glitchify = require('../scripts/glitchImg');
 var path = require('path');
-// var fs = require('fs');
+var fs = require('fs');
 var gm = require('gm');
 
 var aws = require('aws-sdk');
@@ -15,6 +15,7 @@ var s3Params = {
     ContentType: 'image/jpeg',
     ACL: 'public-read'
   };
+  
 exports.drawText = function(link, res, q){
   console.log("drawText: ", q);
   var filename = q.trim().split(" ").join("_") + '.jpg';
