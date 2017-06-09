@@ -1,8 +1,13 @@
+process.env.AWS_ACCESS_KEY_ID = 'AKIAJAN6JT3EJJRGULFA';
+process.env.AWS_SECRET_ACCESS_KEY = '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';
+
 var request = require('request').defaults({ encoding: null });
 var glitchify = require('../scripts/glitchImg');
 var path = require('path');
-var fs = require('fs');
-var gm = require('gm');
+// var fs = require('fs');
+var gm = require('gm').subClass({
+    imageMagick: true
+});
 
 var aws = require('aws-sdk');
 var s3 = new aws.S3();
@@ -36,70 +41,32 @@ var s3Params = {
 // }
 
 exports.drawText = function(link, res, q){
+  console.log("drawText: ", q);
   var filename = q.trim().split(" ").join("_") + '.jpg';
   request.get(link, function (error, response, body) {
-    console.log("drawtext get: ", error)
     gm(body).fill("#FFF").stroke("#000", 1).resize(400).fontSize('30px').font('Impact.ttf').drawText(20, 120,  q.toUpperCase()).stream(function(err, stdout, stderr){
-      // res.sendFile(filename, { root : path.join(__dirname, '../')});
-      s3Params.Key = filename;
-      s3Params.Body = stdout;
-      console.log("output ", stdout);
-      s3.putObject(s3Params, (err, data) => {
-        if(err){
-          console.log(err);
-          return res.end();
-        }
-        const returnData = {
-          signedRequest: data,
-          url: `https://${S3_BUCKET}.s3.amazonaws.com/${filename}`
-        };
-        res.write(JSON.stringify(returnData));
-        res.end();
-      });
-      var buf = new Buffer('');
-    stdout.on('data', function(data) {
-       console.log("sending data!")
-       buf = Buffer.concat([buf, data]);
+        s3Params.Key = filename;
+        var buf = new Buffer('');
+        stdout.on('data', function(d) {
+           buf = Buffer.concat([buf, d]);
+        });
+        stdout.on('end', function(data) {
+            console.log("putting buf", buf);
+            s3Params.Body = buf;
+            s3.putObject(s3Params, (err, s3data) => {
+            if(err){
+              console.log("s3 rrors: ", err);
+              return res.end();
+            }
+            const returnData = {
+              signedRequest: s3data,
+              url: `https://${S3_BUCKET}.s3.amazonaws.com/${filename}`
+            };
+            res.write(JSON.stringify(returnData));
+            res.end();
+            });
+        });
     });
-    stdout.on('end', function(endData) {
-      s3Params.Body = buf;
-      console.log("end: ", endData, s3Params);
-      // s3.putObject(s3Params, (err, data) => {
-      //   if(err){
-      //     console.log(err);
-      //     return res.end();
-      //   }
-      //   const returnData = {
-      //     signedRequest: data,
-      //     url: `https://${S3_BUCKET}.s3.amazonaws.com/${filename}`
-      //   };
-      //   res.write(JSON.stringify(returnData));
-      //   res.end();
-      // });
-     });
-    });
-    // gm('test2.jpg')
-    // .blur(8, 4)
-    // .stroke("red", 7)
-    // .fill("#ffffffbb")
-    // .drawLine(20, 10, 50, 40)
-    // .fill("#2c2")
-    // .stroke("blue", 1)
-    // .drawRectangle(40, 10, 50, 20)
-    // .drawRectangle(60, 10, 70, 20, 3)
-    // .drawArc(80, 10, 90, 20, 0, 180)
-    // .drawEllipse(105, 15, 3, 5)
-    // .drawCircle(125, 15, 120, 15)
-    // .drawPolyline([140, 10], [143, 13], [145, 13], [147, 15], [145, 17], [143, 19])
-    // .drawPolygon([160, 10], [163, 13], [165, 13], [167, 15], [165, 17], [163, 19])
-    // .drawBezier([180, 10], [183, 13], [185, 13], [187, 15], [185, 17], [183, 19])
-    // .fontSize(168)
-    // .stroke("#efe", 2)
-    // .fill("#888")
-    // .drawText(20, 98, "graphics magick")
-    // .write('test3.jpg', function(){
-    //     res.sendFile('test3.jpg', { root : path.join(__dirname, '../')});
-    // })
 
   });
 
