@@ -17,7 +17,7 @@ exports.fetch = function(query, res, full){
     json:true
   }
   rp(opts).then(function(result){
-    console.log(result.items[0].image);
+    console.log("image: ", result.items[0].image, "link: ", result.items[0].link);
     // res.contentType = 'image/jpg';
     // res.pipe(result.items[0].link)
     // res.setHeader("content-disposition", "attachment; filename=logo.png");
