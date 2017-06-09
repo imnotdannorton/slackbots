@@ -48,11 +48,12 @@ exports.drawText = function(link, res, q){
       console.log("out: ", stdout);
       var buf = new Buffer('');
     stdout.on('data', function(data) {
+       console.log("sending data!")
        buf = Buffer.concat([buf, data]);
     });
-    stdout.on('end', function(data) {
-      console.log(data, buf);
+    stdout.on('end', function(endData) {
       s3Params.Body = buf;
+      console.log("end: ", endData, s3Params);
       s3.putObject(s3Params, (err, data) => {
         if(err){
           console.log(err);
