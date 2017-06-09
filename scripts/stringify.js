@@ -1,7 +1,7 @@
 var request = require('request').defaults({ encoding: null });
 var glitchify = require('../scripts/glitchImg');
 var path = require('path');
-// var fs = require('fs');
+var fs = require('fs');
 var gm = require('gm');
 
 var aws = require('aws-sdk');
@@ -42,16 +42,8 @@ exports.drawText = function(link, res, q){
     gm(body).fill("#FFF").stroke("#000", 1).resize(400).fontSize('30px').font('Impact.ttf').drawText(20, 120,  q.toUpperCase()).stream(function(err, stdout, stderr){
       // res.sendFile(filename, { root : path.join(__dirname, '../')});
       s3Params.Key = filename;
-      s3Params.Body = stdout.Buffer;
-      // console.log("out: ", stdout);
-      var buf = new Buffer('');
-    stdout.on('data', function(data) {
-       console.log("sending data!")
-       buf = Buffer.concat([buf, data]);
-    });
-    stdout.on('end', function(endData) {
-      s3Params.Body = buf;
-      console.log("end: ", endData, s3Params);
+      s3Params.Body = stdout;
+      console.log("output ", stdout);
       s3.putObject(s3Params, (err, data) => {
         if(err){
           console.log(err);
@@ -64,6 +56,26 @@ exports.drawText = function(link, res, q){
         res.write(JSON.stringify(returnData));
         res.end();
       });
+      var buf = new Buffer('');
+    stdout.on('data', function(data) {
+       console.log("sending data!")
+       buf = Buffer.concat([buf, data]);
+    });
+    stdout.on('end', function(endData) {
+      s3Params.Body = buf;
+      console.log("end: ", endData, s3Params);
+      // s3.putObject(s3Params, (err, data) => {
+      //   if(err){
+      //     console.log(err);
+      //     return res.end();
+      //   }
+      //   const returnData = {
+      //     signedRequest: data,
+      //     url: `https://${S3_BUCKET}.s3.amazonaws.com/${filename}`
+      //   };
+      //   res.write(JSON.stringify(returnData));
+      //   res.end();
+      // });
      });
     });
     // gm('test2.jpg')
