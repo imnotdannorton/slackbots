@@ -2,9 +2,7 @@ var request = require('request').defaults({ encoding: null });
 var glitchify = require('../scripts/glitchImg');
 var path = require('path');
 // var fs = require('fs');
-var gm = require('gm').subClass({
-    imageMagick: true
-});
+var gm = require('gm');
 
 var aws = require('aws-sdk');
 var s3 = new aws.S3();
@@ -40,12 +38,12 @@ var s3Params = {
 exports.drawText = function(link, res, q){
   var filename = q.trim().split(" ").join("_") + '.jpg';
   request.get(link, function (error, response, body) {
-    console.log("drawtext get: ", error, response, body)
+    console.log("drawtext get: ", error)
     gm(body).fill("#FFF").stroke("#000", 1).resize(400).fontSize('30px').font('Impact.ttf').drawText(20, 120,  q.toUpperCase()).stream(function(err, stdout, stderr){
       // res.sendFile(filename, { root : path.join(__dirname, '../')});
       s3Params.Key = filename;
-      // s3Params.Body = stdout;
-      console.log("out: ", stdout);
+      s3Params.Body = stdout.Buffer;
+      // console.log("out: ", stdout);
       var buf = new Buffer('');
     stdout.on('data', function(data) {
        console.log("sending data!")
