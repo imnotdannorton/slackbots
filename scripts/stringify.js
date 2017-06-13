@@ -1,4 +1,5 @@
-
+process.env.AWS_ACCESS_KEY_ID = 'AKIAIZ6MOZ4KY2W6FHKQ';
+process.env.AWS_SECRET_ACCESS_KEY = '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';
 
 var request = require('request').defaults({ encoding: null });
 var glitchify = require('../scripts/glitchImg');
@@ -15,7 +16,7 @@ var s3Params = {
     ContentType: 'image/jpeg',
     ACL: 'public-read'
   };
-exports.testGM = function(link, res, q){
+exports.stream = function(link, res, q){
 
 }
 exports.drawText = function(link, res, q){
@@ -23,43 +24,46 @@ exports.drawText = function(link, res, q){
   var filename = q.trim().split(" ").join("_") + '.jpg';
   // request.get(link, function (error, response, body) {
     console.log(gm);
-    gm(request(link)).resize(400).setFormat('jpg').toBuffer(function(err, buffer){
+    gm(request(link)).fill("#FFF").stroke("#000", 1).resize(400).fontSize('30px').font('Impact.ttf').drawText(20, 120,  q.toUpperCase()).setFormat('jpg').stream(function(err, stdout, stderr){
         // console.log("body: ", body);
-        console.log("buffer", buffer);
+        // console.log("buffer", buffer, body);
         s3Params.Key = filename;
         s3Params.Body = buffer;
-        s3.putObject(s3Params, (err, s3data) => {
-        if(err){
-          console.log("s3 rrors: ", err);
-          return res.end();
-        }
-        const returnData = {
-          signedRequest: s3data,
-          url: `https://${S3_BUCKET}.s3.amazonaws.com/${filename}`
-        };
-        res.write(JSON.stringify(returnData));
-        res.end();
+        // s3.putObject(s3Params, (err, s3data) => {
+        // if(err){
+        //   console.log("s3 rrors: ", err);
+        //   return res.end();
+        // }
+        // const returnData = {
+        //   signedRequest: s3data,
+        //   url: `https://${S3_BUCKET}.s3.amazonaws.com/${filename}`
+        // };
+        // res.write(JSON.stringify(returnData));
+        // res.end();
+        // });
+        var buf = [];
+        stdout.on('data', function(d) {
+           buf.push(d);
         });
-        // var buf = new Buffer('');
-        // stdout.on('data', function(d) {
-        //    buf = Buffer.concat([buf, d]);
-        // });
-        // stdout.on('end', function(data) {
-        //     console.log("putting buf", buf);
-        //     s3Params.Body = buf;
-        //     s3.putObject(s3Params, (err, s3data) => {
-        //     if(err){
-        //       console.log("s3 rrors: ", err);
-        //       return res.end();
-        //     }
-        //     const returnData = {
-        //       signedRequest: s3data,
-        //       url: `https://${S3_BUCKET}.s3.amazonaws.com/${filename}`
-        //     };
-        //     res.write(JSON.stringify(returnData));
-        //     res.end();
-        //     });
-        // });
+        stdout.once('end', function(data) {
+            console.log("putting buf", buf);
+            s3Params.Body = buf;
+            s3.putObject(s3Params, (err, s3data) => {
+            if(err){
+              console.log("s3 rrors: ", err);
+              return res.end();
+            }
+            const returnData = {
+              signedRequest: s3data,
+              url: `https://${S3_BUCKET}.s3.amazonaws.com/${filename}`
+            };
+            res.write(JSON.stringify(returnData));
+            res.end();
+            });
+        });
+        stdout.once('data', function(data){
+            console.log(String(data));
+        })
     });
 
   // });
