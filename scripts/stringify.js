@@ -41,11 +41,12 @@ exports.drawText = function(link, res, q){
         // });
         var buf = [];
         stdout.on('data', function(d) {
+            console.log('stdout data: ', d);
            buf.push(d);
         });
         stdout.once('end', function(data) {
             console.log("putting buf", buf);
-            s3Params.Body = buf;
+            s3Params.Body = Buffer.concat(buf);
             s3.putObject(s3Params, (err, s3data) => {
             if(err){
               console.log("s3 rrors: ", err);
