@@ -26,7 +26,7 @@ exports.drawText = function(link, res, q){
         // console.log("body: ", body);
         // console.log("buffer", buffer, body);
         s3Params.Key = filename;
-        s3Params.Body = buffer;
+        // s3Params.Body = buffer;
         // s3.putObject(s3Params, (err, s3data) => {
         // if(err){
         //   console.log("s3 rrors: ", err);
